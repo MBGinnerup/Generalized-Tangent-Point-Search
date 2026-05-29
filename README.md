@@ -23,14 +23,14 @@ following contributions:
 
 ### 2D
 
-- **`example_1.py`** — demonstrates path planning on a randomly generated map
-- **`example_2.py`** — demonstrates path planning on a real-world map
-- **`example_3.py`** — demonstrates the graph caching mechanism for repeated path queries
+- **[`example_1.py`](TPS_2D/examples/example_1.py)** — path planning on a randomly generated map
+- **[`example_2.py`](TPS_2D/examples/example_2.py)** — path planning on a real-world map
+- **[`example_3.py`](TPS_2D/examples/example_3.py)** — graph caching for repeated path queries
 
 ### 3D
 
-- **`example_1.py`** — demonstrates path planning on a randomly generated 3D map
-- **`example_2.py`** — demonstrates path planning on a real-world 3D elevation map
+- **[`example_1.py`](TPS_3D/examples/example_1.py)** — path planning on a randomly generated 3D map
+- **[`example_2.py`](TPS_3D/examples/example_2.py)** — path planning on a real-world 3D elevation map
 
 ---
 
