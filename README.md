@@ -17,8 +17,6 @@ following contributions:
 - **Graph caching mechanism** — reduces online planning time in repeated-query scenarios
 - **Random map generator** — configurable 2D and 3D map generator supporting multiple environment types
 
---
-
 ## Examples
 
 ### 2D
