@@ -5,8 +5,7 @@ A generalized Tangent Point Search (TPS) algorithm for 2D and 3D path planning.
 
 This repository contains the implementation of a generalised Tangent 
 Point Search (TPS) algorithm for path planning in both 2D and 3D 
-environments, proposed as part of a bachelor's thesis at Aarhus 
-University. The method extends the improved TPS algorithm of 
+environments. The method modifies the improved TPS algorithm of 
 [Tai et al. (2024)](https://doi.org/10.1109/CoDIT62066.2024.10708452) 
 and [Tai et al. (2025)](https://doi.org/10.1002/rob.22570) with the 
 following contributions:
@@ -35,7 +34,12 @@ following contributions:
 The real-world environments used in this project are obtained using 
 [Map2Model](https://map2model.com), which converts OBJ files of 
 real-world terrain and building data into occupancy grids suitable 
-for path planning. The environments included are:
+for path planning. Each environment contains two OBJ files:
+
+- `environment.obj` — the full environment including terrain and buildings
+- `terrain.obj` — terrain only
+
+The environments included are:
 
 - **University Park, Aarhus** — characterised by large university buildings
 - **Åbyhøj, Aarhus** — characterised by a dense arrangement of smaller residential buildings
