@@ -33,9 +33,9 @@ following contributions:
 ## Real-World Maps
 
 The real-world environments used in this project are obtained using 
-[Map2Map](https://map2map.io), which converts OBJ files of real-world 
-terrain and building data into occupancy grids suitable for path 
-planning. The environments included are:
+[Map2Model](https://map2model.com), which converts OBJ files of 
+real-world terrain and building data into occupancy grids suitable 
+for path planning. The environments included are:
 
 - **University Park, Aarhus** — characterised by large university buildings
 - **Åbyhøj, Aarhus** — characterised by a dense arrangement of smaller residential buildings
@@ -75,5 +75,5 @@ pip install -r requirements.txt
 
 - Tai et al. (2024) — *Tangent Point Search*, CoDIT 2024. [DOI](https://doi.org/10.1109/CoDIT62066.2024.10708452)
 - Tai et al. (2025) — *Improved TPS*, Journal of Field Robotics. [DOI](https://doi.org/10.1002/rob.22570)
-- Map2Map — *Real-world map conversion*. [map2map.io](https://map2map.io)
+- Map2Model — *Real-world map conversion*. [map2model.com](https://map2model.com)
 
