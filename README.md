@@ -17,8 +17,6 @@ following contributions:
 - **Graph caching mechanism** — reduces online planning time in repeated-query scenarios
 - **Random map generator** — configurable 2D and 3D map generator supporting multiple environment types
 
----
-
 ## Examples
 
 ### 2D
@@ -32,8 +30,6 @@ following contributions:
 - **`example_1.py`** — demonstrates path planning on a randomly generated 3D map
 - **`example_2.py`** — demonstrates path planning on a real-world 3D elevation map
 
----
-
 ## Real-World Maps
 
 The real-world environments used in this project are obtained using 
@@ -44,8 +40,6 @@ planning. The environments included are:
 - **University Park, Aarhus** — characterised by large university buildings
 - **Åbyhøj, Aarhus** — characterised by a dense arrangement of smaller residential buildings
 - **Jørpeland, Norway** — mountainous terrain with significant elevation variation (3D only)
-
----
 
 ## Fallback Interface
 
@@ -59,8 +53,6 @@ fallback_method(grid, start, goal) -> path
 This makes it straightforward to replace the default fallback with 
 any alternative planner that accepts a grid, start position, and 
 goal position as input and returns a path.
-
----
 
 ## Installation
 
@@ -78,8 +70,6 @@ pip install -r requirements.txt
 - matplotlib
 - scikit-image
 - tqdm
-
----
 
 ## References
 
