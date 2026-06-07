@@ -32,4 +32,5 @@ graph = graph_builder(map, pre, build_method=TPS, min_dist=75, iterations=1000, 
 
 # %% Visualize
 visualize(map, graph=graph)
+
 # %%
