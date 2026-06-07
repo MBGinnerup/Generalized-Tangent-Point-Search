@@ -14,7 +14,7 @@ from TPS_3D.utils import path_queries as pq
 map, terrain = real_world_map(0.70, map_name='jørpeland')
 
 #%% Pre-Processing
-pre = TPS_preprocess(map, terrain=terrain)
+pre = TPS_preprocess(map, terrain=terrain, parameter=20)
 
 #%% Planning
 start = pq.random_start_environment(map, terrain=terrain)

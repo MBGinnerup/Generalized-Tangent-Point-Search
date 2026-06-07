@@ -5,6 +5,8 @@ import numpy as np
 from tqdm.notebook import tqdm
 import heapq
 from scipy.ndimage import label, generate_binary_structure
+from skimage.feature import peak_local_max
+from skimage.segmentation import watershed
 import numba as nb
 from TPS_3D.utils import path_queries as pq
 from TPS_3D.planners.core import fallback, search, geometry, planners_utils as utils
@@ -28,7 +30,8 @@ def sub_terrains(terrain, sub_size):
     Returns
     -------
     labels : np.ndarray
-        Labeled grid where each sub-region has a unique negative label.
+        3D labeled terrain volume where each terrain region is assigned
+        a unique negative label and non-terrain voxels are zero.
     label_count : int
         Number of labeled sub-regions.
     """
@@ -60,16 +63,89 @@ def sub_terrains(terrain, sub_size):
 
     return labels, label_count
 
-def TPS_preprocess(grid, hull_method = geometry.convexhull, terrain = None, sub_size = 20):
+def terrain_to_heightmap_fast(terrain):
+    """
+    Convert a 3D terrain occupancy grid into a 2D height map.
+
+    For each (x, y) position, the function finds the highest occupied
+    voxel along the z-axis and stores its height in the output map.
+    Positions without any occupied voxels are assigned a height of 0.
+
+    Parameters
+    ----------
+    terrain : np.ndarray
+        3D boolean occupancy grid with shape (x, y, z).
+
+    Returns
+    -------
+    H : np.ndarray
+        2D height map containing the highest occupied z-coordinate
+        at each (x, y) position.
+    """
+    rev = terrain[:, :, ::-1]
+
+    first_hit = np.argmax(rev, axis=2)
+    has_terrain = rev.any(axis=2)
+
+    H = terrain.shape[2] - first_hit - 1
+    H[~has_terrain] = 0
+
+    return H.astype(np.float32)
+
+def sub_terrains_watershed(terrain, min_dist=10):
+    """
+    Segment a 3D terrain into labeled sub-regions using watershed.
+
+    The terrain is first converted into a 2D height map by extracting the
+    highest occupied voxel at each (x, y) position. Local maxima in the
+    height map are used as watershed markers, and watershed segmentation
+    is performed in the x-y plane. The resulting 2D labels are then
+    extruded along the z-axis and masked by the original terrain volume.
+
+    Parameters
+    ----------
+    terrain : np.ndarray
+        3D boolean occupancy grid representing the terrain.
+    min_dist : int, optional
+        Minimum distance between detected peaks used as watershed markers.
+
+    Returns
+    -------
+    labels : np.ndarray
+        3D labeled terrain volume where each terrain region is assigned
+        a unique negative label and non-terrain voxels are zero.
+    label_count : int
+        Number of segmented terrain regions.
+    """
+    H = terrain_to_heightmap_fast(terrain)
+
+    coords = peak_local_max(H, min_distance=min_dist, exclude_border=False)
+    markers = np.zeros_like(H, dtype=np.int32)
+    for i, (x, y) in enumerate(coords):
+        markers[x, y] = i + 1
+
+    labels_2d = watershed(-H, markers)
+
+    labels_3d = np.repeat(labels_2d[:, :, np.newaxis], terrain.shape[2], axis=2)
+
+    labels_3d[~terrain] = 0
+
+    label_count = labels_2d.max()
+
+    return -labels_3d, label_count
+
+def TPS_preprocess(grid, hull_method = geometry.convexhull, terrain = None, sub_terrain_method = sub_terrains, parameter = 20):
     """
     Preprocess a 3D occupancy grid for Tangent Point Search (TPS).
 
-    The function performs connected-component labeling on obstacles,
-    computes convex hulls for each obstacle region, and optionally
-    re-inserts terrain regions as separate labeled obstacles.
+    The function performs connected-component labeling on obstacle
+    regions, computes convex hulls for each obstacle, and optionally
+    removes terrain before labeling and reintroduces it afterwards as
+    separately labeled terrain regions.
 
-    terrain regions are optionally removed before labeling and later
-    reintroduced using a sub-division scheme.
+    Terrain segmentation is performed using the supplied
+    `sub_terrain_method`, which may be a fixed subdivision method
+    or a terrain segmentation method such as watershed.
 
     Parameters
     ----------
@@ -77,19 +153,23 @@ def TPS_preprocess(grid, hull_method = geometry.convexhull, terrain = None, sub_
         3D binary occupancy grid.
     hull_method : callable, optional
         Function used to compute convex hulls from voxel sets.
-    ground : np.ndarray or None
-        Mask of terrain voxels to exclude/include.
-    sub_size : int
-        Size used for subdividing ground regions.
+    terrain : np.ndarray or None, optional
+        Boolean terrain mask to remove and later reinsert.
+    sub_terrain_method : callable, optional
+        Function used to split the terrain into labeled sub-regions.
+        Must return (labels, label_count).
+    parameter : int or float, optional
+        Parameter passed directly to `sub_terrain_method`.
+        For example:
+        - sub_size for block-based subdivision
+        - min_dist for watershed segmentation
 
     Returns
     -------
-    tuple
-        (hulls, labels)
-        hulls : dict
-            Mapping from label → convex hull representation.
-        labels : np.ndarray
-            Labeled 3D grid.
+    hulls : dict
+        Mapping from label → convex hull representation.
+    labels : np.ndarray
+        Labeled 3D occupancy grid.
     """
     # Remove ground from occupancy grid before labeling
     if terrain is not None:
@@ -111,7 +191,7 @@ def TPS_preprocess(grid, hull_method = geometry.convexhull, terrain = None, sub_
     if terrain is not None:
 
         # Split terrain into sub-regions for labeling
-        labels_terrain, n_terrain = sub_terrains(terrain, sub_size)
+        labels_terrain, n_terrain = sub_terrain_method(terrain, parameter)
         labels[labels_terrain != 0] = labels_terrain[labels_terrain != 0]
 
         # Compute convex hull for terrain-derived obstacle regions
