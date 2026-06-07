@@ -63,7 +63,7 @@ def sub_terrains(terrain, sub_size):
 
     return labels, label_count
 
-def terrain_to_heightmap_fast(terrain):
+def terrain_to_heightmap(terrain):
     """
     Convert a 3D terrain occupancy grid into a 2D height map.
 
@@ -82,10 +82,10 @@ def terrain_to_heightmap_fast(terrain):
         2D height map containing the highest occupied z-coordinate
         at each (x, y) position.
     """
-    rev = terrain[:, :, ::-1]
+    reverse = terrain[:, :, ::-1]
 
-    first_hit = np.argmax(rev, axis=2)
-    has_terrain = rev.any(axis=2)
+    first_hit = np.argmax(reverse, axis=2)
+    has_terrain = reverse.any(axis=2)
 
     H = terrain.shape[2] - first_hit - 1
     H[~has_terrain] = 0
@@ -117,7 +117,7 @@ def sub_terrains_watershed(terrain, min_dist=10):
     label_count : int
         Number of segmented terrain regions.
     """
-    H = terrain_to_heightmap_fast(terrain)
+    H = terrain_to_heightmap(terrain)
 
     coords = peak_local_max(H, min_distance=min_dist, exclude_border=False)
     markers = np.zeros_like(H, dtype=np.int32)
